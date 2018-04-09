@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>pass</groupId>
+    <groupId>org.dataconservancy.pass</groupId>
     <artifactId>pass-indexer</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>

@@ -4,7 +4,7 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>pass</groupId>
+  <groupId>org.dataconservancy.pass</groupId>
   <artifactId>pass-indexer</artifactId>
   <version>0.0.1-SNAPSHOT</version>
 
@@ -55,10 +55,17 @@
         <artifactId>junit</artifactId>
         <version>${junit.version}</version>
       </dependency>
+      
+    <dependency>
+      <groupId>org.dataconservancy.pass</groupId>
+      <artifactId>pass-indexer-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>      
     </dependencies>
   </dependencyManagement>
 
   <modules>
     <module>pass-indexer-core</module>
+    <module>pass-indexer-cli</module>    
   </modules>
 </project>

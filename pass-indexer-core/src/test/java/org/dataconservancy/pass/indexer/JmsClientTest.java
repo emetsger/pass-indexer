@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package pass.indexer;
+package org.dataconservancy.pass.indexer;
 
 import static org.junit.Assert.assertTrue;
 
@@ -28,8 +28,6 @@ import javax.jms.Session;
 import org.apache.activemq.junit.EmbeddedActiveMQBroker;
 import org.junit.Rule;
 import org.junit.Test;
-
-import pass.indexer.JmsClient;
 
 /**
  * @author apb@jhu.edu

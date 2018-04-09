@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package pass.indexer;
+package org.dataconservancy.pass.indexer;
 
 import java.util.ArrayList;
 import java.util.Collections;

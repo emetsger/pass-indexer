@@ -1,4 +1,4 @@
-package pass.indexer;
+package org.dataconservancy.pass.indexer;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

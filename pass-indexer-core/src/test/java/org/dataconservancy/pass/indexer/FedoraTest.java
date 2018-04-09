@@ -1,5 +1,6 @@
-package pass.indexer;
+package org.dataconservancy.pass.indexer;
 
+import org.apache.activemq.ActiveMQConnectionFactory;
 import org.junit.Test;
 
 public class FedoraTest {
@@ -8,15 +9,15 @@ public class FedoraTest {
     public void test() throws Exception {
         FedoraIndexerService serv = new FedoraIndexerService();
         
-        serv.setJmsBrokerURL("tcp://localhost:61616");
+        serv.setJmsConnectionFactory(new ActiveMQConnectionFactory("tcp://localhost:61616"));
         serv.setJmsQueue("fedora");
         serv.setElasticsearchIndexUrl("http://localhost:9200/pass/");
         serv.setFedoraUser("admin");
         serv.setFedoraPass("moo");
-        serv.setAllowedTypes("http://example.org/pass/Grant", "http://example.org/pass/Submission");
+        serv.setAllowedTypePrefix("http://example.org/pass/");
         
         serv.start();
         Thread.sleep(300 * 1000);
-        serv.shutdown();        
+        serv.close();       
     }
 }

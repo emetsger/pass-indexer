@@ -1,13 +1,10 @@
-package pass.indexer;
+package org.dataconservancy.pass.indexer;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
+import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
 
-import org.apache.activemq.ActiveMQConnectionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,27 +16,27 @@ import org.slf4j.LoggerFactory;
  * Setup a handler that reads Fedora events from a JMS queue and updates an
  * Elasticsearch index in response.
  */
-public class FedoraIndexerService {
+public class FedoraIndexerService implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(FedoraIndexerService.class);
     
     private JmsClient jms_client;
-    private String jms_broker_url;
+    private ConnectionFactory jms_con_fact;
     private String jms_queue;
-    private Set<String> allowed_types;
+    private String allowed_type_prefix;
     private String elasticsearch_index_url;
     private String fedora_user;
     private String fedora_pass;
 
-    public void setJmsBrokerURL(String jms_broker_url) {
-        this.jms_broker_url = jms_broker_url;
+    public void setJmsConnectionFactory(ConnectionFactory conf_fact) {
+        this.jms_con_fact = conf_fact;
     }
 
     public void setJmsQueue(String jms_queue) {
         this.jms_queue = jms_queue;
     }
 
-    public void setAllowedTypes(String... types) {
-        this.allowed_types = new HashSet<>(Arrays.asList(types));
+    public void setAllowedTypePrefix(String prefix) {
+        this.allowed_type_prefix = prefix;
     }
 
     public void setElasticsearchIndexUrl(String elasticsearch_index_url) {
@@ -56,7 +53,7 @@ public class FedoraIndexerService {
     
     private boolean should_handle(FedoraMessage fedora_msg) {
         for (String type : fedora_msg.getResourceTypes()) {
-            if (allowed_types.contains(type)) {
+            if (type.startsWith(allowed_type_prefix)) {
                 return true;
             }
         }
@@ -65,7 +62,7 @@ public class FedoraIndexerService {
     }
 
     public void start() {
-        jms_client = new JmsClient(new ActiveMQConnectionFactory(jms_broker_url));
+        jms_client = new JmsClient(jms_con_fact);
 
         ElasticSearchIndexer es = new ElasticSearchIndexer(elasticsearch_index_url, fedora_user, fedora_pass);
 
@@ -85,12 +82,13 @@ public class FedoraIndexerService {
             }
         });
         
-        LOG.info("Started listening on " + jms_broker_url + " queue " + jms_queue);
-        LOG.info("Elasticsearch index: " + elasticsearch_index_url);
+        LOG.info("Started listening on jms queue " + jms_queue);
+        LOG.info("Elasticsearch index: " + elasticsearch_index_url);       
     }
 
-    public void shutdown() {
+    @Override
+    public void close() {
         LOG.info("Shutting down JMS client");
-        jms_client.close();
+        jms_client.close();        
     }
 }
