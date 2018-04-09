@@ -10,13 +10,13 @@ public class FedoraTest {
         
         serv.setJmsBrokerURL("tcp://localhost:61616");
         serv.setJmsQueue("fedora");
-        serv.setElasticsearchIndexUrl("http://localhost:9200/pass/_doc/?pretty");
+        serv.setElasticsearchIndexUrl("http://localhost:9200/pass/");
         serv.setFedoraUser("admin");
         serv.setFedoraPass("moo");
         serv.setAllowedTypes("http://example.org/pass/Grant", "http://example.org/pass/Submission");
         
         serv.start();
-        Thread.sleep(30 * 1000);
+        Thread.sleep(300 * 1000);
         serv.shutdown();        
     }
 }

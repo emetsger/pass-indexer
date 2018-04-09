@@ -67,7 +67,7 @@ public class FedoraIndexerService {
     public void start() {
         jms_client = new JmsClient(new ActiveMQConnectionFactory(jms_broker_url));
 
-        ElasticsearchIndexer es = new ElasticsearchIndexer(elasticsearch_index_url, fedora_user, fedora_pass);
+        ElasticSearchIndexer es = new ElasticSearchIndexer(elasticsearch_index_url, fedora_user, fedora_pass);
 
         jms_client.listen(jms_queue, msg -> {
             try {
