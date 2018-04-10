@@ -3,7 +3,7 @@ package org.dataconservancy.pass.indexer;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.junit.Test;
 
-public class FedoraTest {
+public class FedoraIT {
 
     @Test
     public void test() throws Exception {

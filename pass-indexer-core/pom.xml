@@ -25,11 +25,11 @@
     </dependency>
 
    <dependency>
-    <groupId>com.squareup.okhttp</groupId>
+    <groupId>com.squareup.okhttp3</groupId>
     <artifactId>okhttp</artifactId>
     <version>${okhttp.version}</version>
    </dependency>
-    
+   
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
@@ -72,9 +72,16 @@
     </dependency>
 
     <dependency>
+     <groupId>com.squareup.okhttp3</groupId>
+     <artifactId>mockwebserver</artifactId>
+     <version>${okhttp.version}</version>
+     <scope>test</scope>
+   </dependency>
+
+    <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>1.1.9</version>
+      <version>${logback.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

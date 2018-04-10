@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
  */
 public class FedoraIndexerService implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(FedoraIndexerService.class);
-    
+
     private JmsClient jms_client;
     private ConnectionFactory jms_con_fact;
     private String jms_queue;
@@ -50,7 +50,7 @@ public class FedoraIndexerService implements AutoCloseable {
     public void setFedoraPass(String fedora_pass) {
         this.fedora_pass = fedora_pass;
     }
-    
+
     private boolean should_handle(FedoraMessage fedora_msg) {
         for (String type : fedora_msg.getResourceTypes()) {
             if (type.startsWith(allowed_type_prefix)) {
@@ -69,26 +69,33 @@ public class FedoraIndexerService implements AutoCloseable {
         jms_client.listen(jms_queue, msg -> {
             try {
                 FedoraMessage fedora_msg = FedoraMessageConverter.convert(msg);
-                
+
                 boolean should_handle = should_handle(fedora_msg);
-                
+
                 LOG.debug("Fedora message:" + fedora_msg + "; handle: " + should_handle);
 
                 if (should_handle) {
                     es.handle(fedora_msg);
-                } 
+                }
             } catch (IOException | JMSException e) {
                 throw new RuntimeException(e);
             }
         });
-        
+
         LOG.info("Started listening on jms queue " + jms_queue);
-        LOG.info("Elasticsearch index: " + elasticsearch_index_url);       
+        LOG.info("Elasticsearch index: " + elasticsearch_index_url);
     }
 
     @Override
     public void close() {
-        LOG.info("Shutting down JMS client");
-        jms_client.close();        
+        if (jms_client != null) {
+            LOG.info("Shutting down JMS client");
+            jms_client.close();
+        }
+    }
+
+    // Needed for testing
+    protected JmsClient getJmsClient() {
+        return jms_client;
     }
 }

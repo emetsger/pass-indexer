@@ -1,6 +1,7 @@
 package org.dataconservancy.pass.indexer;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
@@ -8,12 +9,13 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.squareup.okhttp.Credentials;
-import com.squareup.okhttp.MediaType;
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.RequestBody;
-import com.squareup.okhttp.Response;
+import okhttp3.Credentials;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
 
 // TODO Auto-complete
 // TODO Schema
@@ -24,6 +26,7 @@ import com.squareup.okhttp.Response;
  * Maintain documents corresponding to the JSON-LD representation of Fedora resources.
  * The compact JSON-LD representation must be simple enough for Elasticsearch to understand.
  * Documents are updated when Fedora resources are created or modified or deleted.
+ * The document id is the path of the Fedora URI encoded as base64 safe for URLs.
  */
 public class ElasticSearchIndexer {
     public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
@@ -45,42 +48,46 @@ public class ElasticSearchIndexer {
         Request get = new Request.Builder().url(uri).header("Authorization", fedora_cred)
                 .header("Accept", JSON_LD_COMPACT).build();
 
-        Response response = client.newCall(get).execute(); 
-        
+        Response response = client.newCall(get).execute();
+
         if (!response.isSuccessful()) {
             LOG.error("Failed to retrieve Fedora resource: " + uri + " " + response.code());
         }
-        
+
         return response.body().string();
     }
     
+    // Return URL safe base64 encoding of string.
     private String base64_encode(String s) {
-        return Base64.getEncoder().encodeToString(s.getBytes(StandardCharsets.UTF_8));
+        return Base64.getUrlEncoder().encodeToString(s.getBytes(StandardCharsets.UTF_8));
     }
-    
-    private String get_document_id(String fedora_uri) {
-        return base64_encode(fedora_uri);
+
+    // Return URL safe document id.
+    private String get_document_id(String fedora_uri) throws IOException {
+        return base64_encode(new URL(fedora_uri).getPath());
     }
-    
-    private String get_create_document_url(String doc_id) {
+
+    private String get_create_document_url(String doc_id) throws IOException {
         return es_index_url + "_doc/" + doc_id + "?pretty";
     }
-    
+
     // Do any normalization necessary before indexing.
     private String normalize_document(String json) {
         JSONObject o = new JSONObject(json);
-        
-        // TODO For the moment remove inline @context which Elasticsearch cannot handle        
+
+        // TODO For the moment remove inline @context which Elasticsearch cannot
+        // handle
         o.remove("@context");
-        
+
         return o.toString();
     }
 
-    // Create or update the document corresponding to a Fedora resource in Elasticsearch.
+    // Create or update the document corresponding to a Fedora resource in
+    // Elasticsearch.
     // For simplicity the document id is the base64 encoded Fedora URI.
     private void update_document(String fedora_uri) throws IOException {
-        LOG.debug("Updating document for Fedora resource: " + fedora_uri);        
-        
+        LOG.debug("Updating document for Fedora resource: " + fedora_uri);
+
         String doc = normalize_document(get_fedora_resource(fedora_uri));
         String doc_id = get_document_id(fedora_uri);
         String doc_url = get_create_document_url(doc_id);
@@ -96,10 +103,10 @@ public class ElasticSearchIndexer {
             LOG.error("Update failure: " + result);
         }
     }
-    
+
     private void delete_document(String fedora_uri) throws IOException {
-        LOG.debug("Deleting document for Fedora resource: " + fedora_uri);        
-        
+        LOG.debug("Deleting document for Fedora resource: " + fedora_uri);
+
         String doc_id = get_document_id(fedora_uri);
         String doc_url = get_create_document_url(doc_id);
 
@@ -116,9 +123,10 @@ public class ElasticSearchIndexer {
 
     public void handle(FedoraMessage m) throws IOException {
         LOG.debug("Handling Fedora message: " + m);
-        
+
         switch (m.getAction()) {
-        case CREATED: case MODIFIED:
+        case CREATED:
+        case MODIFIED:
             update_document(m.getResourceURI());
             break;
         case DELETED:
