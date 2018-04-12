@@ -1,0 +1,59 @@
+{
+  "settings": {
+    "index" : {
+      "refresh_interval" : "10s"
+    }
+  },
+  "mappings": {
+    "_doc": {
+      "properties": {
+        "@id": {"type": "keyword"},
+        "@type": {"type": "keyword"},        
+        "abstract": {"type": "text"},
+        "author": {"type": "keyword"},
+        "awardNumber": {"type": "keyword"},
+        "assignedId": {"type": "keyword"},
+        "copis": {"type": "keyword"},
+        "creationDate": {"type": "date"},
+        "creator": {"type": "keyword"},
+        "deposits": {"type": "keyword"},
+        "doi": {"type": "keyword"},
+        "email": {"type": "keyword"},
+        "endDate": {"type": "date"},
+        "externalId": {"type": "keyword"},
+        "funder": {"type": "keyword"},
+        "grant": {"type": "keyword"},
+        "grants": {"type": "keyword"},
+        "identifier": {"type": "keyword"},
+        "issue": {"type": "keyword"},
+        "ISSNs": {"type": "keyword"},
+        "label": {"type": "text"},
+        "journal": {"type": "keyword"},
+        "journals": {"type": "keyword"},
+        "name": {"type": "text"},
+        "nlmta": {"type": "keyword"},
+        "oapCompliance": {"type": "keyword"},
+        "orcid": {"type": "keyword"},
+        "pi": {"type": "keyword"},
+        "pmcParticipation": {"type": "keyword"},
+        "projectName": {"type": "text"},
+        "publisher": {"type": "keyword"},
+        "repo": {"type": "keyword"},
+        "requested": {"type": "keyword"},
+        "role": {"type": "keyword"},
+        "status": {"type": "keyword"},
+        "startDate": {"type": "date"},
+        "step": {"type": "keyword"},
+        "steps": {"type": "keyword"},
+        "type": {"type": "keyword"},
+        "title": {"type": "text"},
+        "submissions": {"type": "keyword"},
+        "submittedDate": {"type": "date"},
+        "updatedDate": {"type": "date"},
+        "uri": {"type": "keyword"},
+        "username": {"type": "keyword"},
+        "volume": {"type": "keyword"}
+      }
+    }
+  }
+}
