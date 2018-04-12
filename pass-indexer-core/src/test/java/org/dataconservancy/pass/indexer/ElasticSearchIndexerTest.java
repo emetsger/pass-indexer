@@ -64,7 +64,8 @@ public class ElasticSearchIndexerTest {
 
         assertEquals("GET", get.getMethod());
         assertNotNull(get.getHeader("Authorization"));
-        assertEquals("application/ld+json; profile=\"http://www.w3.org/ns/json-ld#compacted\"", get.getHeader("Accept"));
+        assertEquals(ElasticSearchIndexer.FEDORA_ACCEPT_HEADER, get.getHeader("Accept"));
+        assertEquals(ElasticSearchIndexer.FEDORA_PREFER_HEADER, get.getHeader("Prefer"));
         assertEquals(fedora_res_uri, get.getRequestUrl().toString());
 
         RecordedRequest post = server.takeRequest();
@@ -109,7 +110,8 @@ public class ElasticSearchIndexerTest {
 
         assertEquals("GET", get.getMethod());
         assertNotNull(get.getHeader("Authorization"));
-        assertEquals("application/ld+json; profile=\"http://www.w3.org/ns/json-ld#compacted\"", get.getHeader("Accept"));
+        assertEquals(ElasticSearchIndexer.FEDORA_ACCEPT_HEADER, get.getHeader("Accept"));
+        assertEquals(ElasticSearchIndexer.FEDORA_PREFER_HEADER, get.getHeader("Prefer"));
         assertEquals(fedora_res_uri, get.getRequestUrl().toString());
 
         RecordedRequest post = server.takeRequest();

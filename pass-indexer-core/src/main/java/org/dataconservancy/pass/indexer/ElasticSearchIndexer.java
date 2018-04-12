@@ -29,8 +29,10 @@ import okhttp3.Response;
  * The document id is the path of the Fedora URI encoded as base64 safe for URLs.
  */
 public class ElasticSearchIndexer {
-    public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-    private static final String JSON_LD_COMPACT = "application/ld+json; profile=\"http://www.w3.org/ns/json-ld#compacted\"";
+    public static final String FEDORA_ACCEPT_HEADER = "application/ld+json; profile=\"http://www.w3.org/ns/json-ld#compacted\"";
+    public static final String FEDORA_PREFER_HEADER = "return=representation; omit=\"http://fedora.info/definitions/v4/repository#ServerManaged\"";
+    
+    private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     private static final Logger LOG = LoggerFactory.getLogger(ElasticSearchIndexer.class);
 
     private final OkHttpClient client;
@@ -43,10 +45,10 @@ public class ElasticSearchIndexer {
         this.fedora_cred = Credentials.basic(fedora_user, fedora_pass);
     }
 
-    // Return compact JSON-LD representation of Fedora resource
+    // Return compact JSON-LD representation of Fedora resource without server triples
     private String get_fedora_resource(String uri) throws IOException {
         Request get = new Request.Builder().url(uri).header("Authorization", fedora_cred)
-                .header("Accept", JSON_LD_COMPACT).build();
+                .header("Accept", FEDORA_ACCEPT_HEADER).header("Prefer", FEDORA_PREFER_HEADER).build();
 
         Response response = client.newCall(get).execute();
 
