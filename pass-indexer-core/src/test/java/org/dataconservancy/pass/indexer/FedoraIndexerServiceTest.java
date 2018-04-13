@@ -25,20 +25,32 @@ public class FedoraIndexerServiceTest {
     
     
     @Before
-    public void setup() {
+    public void setup() throws Exception {
         EmbeddedActiveMQBroker broker = new EmbeddedActiveMQBroker();
 
         server = new MockWebServer();
+        
+        // GET for Elasticsearch index config
+        server.enqueue(new MockResponse().setResponseCode(404));
+        
+        // PUT for Elasticsearch index config
+        server.enqueue(new MockResponse().setBody("{}"));
+        
         es_index_url = server.url("/es/test/");
         queue = "fedora";
         service = new FedoraIndexerService();
-        
         service.setAllowedTypePrefix("http://example.org/");
         service.setElasticsearchIndexUrl(es_index_url.toString());
         service.setFedoraUser("moo");
         service.setFedoraPass("moo");
         service.setJmsConnectionFactory(broker.createConnectionFactory());
         service.setJmsQueue(queue);
+        
+        service.start();
+        
+        // Drain index config requests
+        server.takeRequest();
+        server.takeRequest();
     }
     
     @After
@@ -50,8 +62,6 @@ public class FedoraIndexerServiceTest {
     // Test handling of a create message added to the JMS queue.
     @Test
     public void testCreationMessage() throws Exception {
-        service.start();
-        
         JmsClient jms_client = service.getJmsClient();
 
         // Fedora resource created

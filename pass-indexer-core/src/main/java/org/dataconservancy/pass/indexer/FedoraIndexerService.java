@@ -61,11 +61,11 @@ public class FedoraIndexerService implements AutoCloseable {
         return false;
     }
 
-    public void start() {
+    public void start() throws IOException {
         jms_client = new JmsClient(jms_con_fact);
 
         ElasticSearchIndexer es = new ElasticSearchIndexer(elasticsearch_index_url, fedora_user, fedora_pass);
-
+        
         jms_client.listen(jms_queue, msg -> {
             try {
                 FedoraMessage fedora_msg = FedoraMessageConverter.convert(msg);

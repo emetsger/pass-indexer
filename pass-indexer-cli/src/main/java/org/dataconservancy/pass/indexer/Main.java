@@ -1,5 +1,7 @@
 package org.dataconservancy.pass.indexer;
 
+import java.io.IOException;
+
 import org.apache.activemq.ActiveMQConnectionFactory;
 
 public class Main {
@@ -19,7 +21,7 @@ public class Main {
         return value;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         try (FedoraIndexerService serv = new FedoraIndexerService()) {
             serv.setJmsConnectionFactory(new ActiveMQConnectionFactory(get_config("PI_FEDORA_JMS_BROKER")));
             serv.setJmsQueue(get_config("PI_FEDORA_JMS_QUEUE"));
