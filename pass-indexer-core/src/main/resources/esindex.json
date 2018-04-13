@@ -2,6 +2,15 @@
   "settings": {
     "index" : {
       "refresh_interval" : "10s"
+    },
+    "analysis": {
+      "normalizer": {
+        "ignorecase": {
+          "type": "custom",
+          "char_filter": [],
+          "filter": ["lowercase", "asciifolding"]
+        }
+      }
     }
   },
   "mappings": {
@@ -11,7 +20,7 @@
         "@type": {"type": "keyword"},        
         "abstract": {"type": "text"},
         "author": {"type": "keyword"},
-        "awardNumber": {"type": "keyword"},
+        "awardNumber": {"type": "keyword", "normalizer": "ignorecase"},
         "assignedId": {"type": "keyword"},
         "copis": {"type": "keyword"},
         "creationDate": {"type": "date"},
