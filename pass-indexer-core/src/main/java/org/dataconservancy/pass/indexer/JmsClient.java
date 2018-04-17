@@ -170,7 +170,7 @@ public class JmsClient implements AutoCloseable {
                     LOG.info("JMS error: {}, re-connecting", e.getMessage());
                 }
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(2000);
                 } catch (final InterruptedException i) {
                     Thread.currentThread().interrupt();
                 }
