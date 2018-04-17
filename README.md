@@ -9,12 +9,12 @@ The pass-indexer monitors a JMS queue for messages about creation, deletion, and
 (Fedora must be configured appropriately to setup this queue.)
 
 The Elasticsearch index is created on startup if it does not exist with a set [configuration](pass-indexer-core/src/main/resources/esindex.json).
-If the index does exist, the configuration is retrieved from the index. In either case The mapping must match the documents which will be indexed.
+If the index does exist, the configuration is retrieved from the index. In either case the mapping must match the documents which will be indexed.
 The Elasticsearch document is the compact JSON-LD representation of that resource without server triples.
 
 When there is a message about a resource of a type being monitored, the indexer either creates a corresponding document in Elasticsearch 
 from the Fedora resource, updates such a document, or deletes the document.  Only messages about a resource of a type which matches a
-configured prefix are handled.
+configured prefix, PI_TYPE_PREFIX, are handled.
 
 # Command line tool
 
