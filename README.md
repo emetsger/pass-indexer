@@ -14,7 +14,7 @@ The Elasticsearch document is the compact JSON-LD representation of that resourc
 
 When there is a message about a resource of a type being monitored, the indexer either creates a corresponding document in Elasticsearch 
 from the Fedora resource, updates such a document, or deletes the document.  Only messages about a resource of a type which matches a
-configured prefix, PI_TYPE_PREFIX, are handled.
+configured prefix, PI_TYPE_PREFIX, are handled. The id of the Elasticsearch document is the safe URL base64 encoding of resource path. This lets both the document be created and updated with the same PUT.
 
 # Command line tool
 
