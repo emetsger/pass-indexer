@@ -57,6 +57,7 @@ public class ElasticSearchIndexerTest {
         res_json.put("@context",
                 "https://raw.githubusercontent.com/OA-PASS/ember-fedora-adapter/master/tests/dummy/public/farm.jsonld");
         res_json.put("healthy", true);
+        res_json.put("awardNumber", "32");
         res_json.put("name", "moo");
 
         // GET for Fedora resource
@@ -88,8 +89,14 @@ public class ElasticSearchIndexerTest {
         JSONObject payload = new JSONObject(es_post.getBody().readUtf8());
         
         // Check the JSON posted to Elasticsearch. 
+        
         // Healthy which is not in mapping should be removed
         assertFalse(payload.has("healthy"));
+        
+        // Should have awardNumber_suggest added for awardNumber.
+        assertEquals(res_json.get("awardNumber"), payload.get("awardNumber"));
+        assertEquals(res_json.get("awardNumber"), payload.get("awardNumber_suggest"));
+        
         assertEquals(res_json.get("@id"), payload.get("@id"));
         assertEquals(res_json.get("@type"), payload.get("@type"));        
         assertEquals(res_json.get("name"), payload.get("name"));

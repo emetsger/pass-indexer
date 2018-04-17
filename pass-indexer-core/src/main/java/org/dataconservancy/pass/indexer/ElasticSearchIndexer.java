@@ -23,8 +23,6 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 
 
-// TODO Issues with public vs private Fedora URI
-
 /**
  * Maintain documents corresponding to the JSON-LD representation of Fedora resources.
  * The compact JSON-LD representation must be simple enough for Elasticsearch to understand.
@@ -71,9 +69,12 @@ public class ElasticSearchIndexer {
         JSONObject config = get_existing_index_configuration();
 
         if (config == null) {
+            LOG.info("Index does not exist. Creating " + es_index_url);
             config = load_builtin_index_configuration();
             create_index(config);
-        } 
+        } else {
+            LOG.info("Found existing index " + es_index_url);
+        }
         
         // Determine the available fields in the index from the configuration and which fields support completion.
         
@@ -191,7 +192,9 @@ public class ElasticSearchIndexer {
         
         // ADD NAME_suggest for each suggestion field NAME
         suggest_fields.forEach(f -> {
-            o.put(f + SUGGEST_SUFFIX, o.get(f));
+            if (o.has(f)) {
+                o.put(f + SUGGEST_SUFFIX, o.get(f));
+            }
         });
         
         return o.toString();
