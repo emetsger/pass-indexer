@@ -31,12 +31,16 @@ import okhttp3.Response;
  * The mapping in the index configuration is used to check JSON documents retrieved from Fedora 
  * before indexing. Properties which do not have a mapping or otherwise cannot be indexed are
  * logged and ignored.
+ * 
+ * Properties which contain Fedora URIs have a custom matching with causes them to be indexed as
+ * Fedora resource paths. This allows a client to search using different URIs which map to the same
+ * Fedora resource.
  */
 public class ElasticSearchIndexer {
     public static final String FEDORA_ACCEPT_HEADER = "application/ld+json; profile=\"http://www.w3.org/ns/json-ld#compacted\"";
     public static final String FEDORA_PREFER_HEADER = "return=representation; omit=\"http://fedora.info/definitions/v4/repository#ServerManaged\"";
    
-    private static final String ES_INDEX_CONFIG="/esindex.json";
+    private static final String ES_INDEX_CONFIG = "/esindex.json";
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     private static final Logger LOG = LoggerFactory.getLogger(ElasticSearchIndexer.class);
 
@@ -49,13 +53,11 @@ public class ElasticSearchIndexer {
      * If the given Elasticsearch does not exist, create it using the built in configuration.
      * Otherwise the configuration is retrieved from the index.
      * 
-     * @param es_index_url
+     * @param es_index_url 
      * @param fedora_user
      * @param fedora_pass
-     * @throws IOException        JSONObject props = config.getJSONObject("mappings").getJSONObject("_doc").getJSONObject("properties");
-        supported_fields = new HashSet<>(props.keySet());
-        
-        suggest_fields = supported_fields.stream().filter(f -> f.endsWith(SUGGEST_SUFFIX)).collect(Collectors.toSet());
+     * @param fedora_uri_pattern - Must match the part of the Fedura URI which is the the resource path.
+     * @throws IOException
      */
     public ElasticSearchIndexer(String es_index_url, String fedora_user, String fedora_pass) throws IOException {
         this.client = new OkHttpClient();
