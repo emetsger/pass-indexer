@@ -4,11 +4,23 @@
       "refresh_interval" : "10s"
     },
     "analysis": {
+      "char_filter" : {
+        "fedora_uri_to_path" : {
+          "type": "pattern_replace",
+          "pattern": "http://fcrepo:8080/fcrepo/rest|https://pass/fcrepo/rest",
+          "replacement": ""
+        }
+      },
       "normalizer": {
         "ignorecase": {
           "type": "custom",
           "char_filter": [],
           "filter": ["lowercase", "asciifolding"]
+        },
+        "fedora_uri": {
+          "type": "custom",
+          "char_filter": ["fedora_uri_to_path"],
+          "filter": []
         }
       }
     }
@@ -17,35 +29,35 @@
     "_doc": {
       "dynamic": false,      
       "properties": {
-        "@id": {"type": "keyword"},
+        "@id": {"type": "keyword", "normalizer": "fedora_uri"},
         "@type": {"type": "keyword"},        
         "abstract": {"type": "text"},
-        "author": {"type": "keyword"},
+        "author": {"type": "keyword", "normalizer": "fedora_uri"},
         "awardNumber": {"type": "keyword", "normalizer": "ignorecase", "copy_to": "awardNumber_suggest"},
         "awardNumber_suggest": {"type": "completion"},
-        "assignedId": {"type": "keyword"},
-        "copis": {"type": "keyword"},
+        "assignedId": {"type": "keyword", "normalizer": "fedora_uri"},
+        "copis": {"type": "keyword", "normalizer": "fedora_uri"},
         "creationDate": {"type": "date"},
-        "creator": {"type": "keyword"},
-        "deposits": {"type": "keyword"},
+        "creator": {"type": "keyword", "normalizer": "fedora_uri"},
+        "deposits": {"type": "keyword", "normalizer": "fedora_uri"},
         "doi": {"type": "keyword"},
         "email": {"type": "keyword"},
         "endDate": {"type": "date"},
-        "externalId": {"type": "keyword"},
-        "funder": {"type": "keyword"},
-        "grant": {"type": "keyword"},
-        "grants": {"type": "keyword"},
-        "identifier": {"type": "keyword"},
+        "externalId": {"type": "keyword", "normalizer": "fedora_uri"},
+        "funder": {"type": "keyword", "normalizer": "fedora_uri"},
+        "grant": {"type": "keyword", "normalizer": "fedora_uri"},
+        "grants": {"type": "keyword", "normalizer": "fedora_uri"},
+        "identifier": {"type": "keyword", "normalizer": "fedora_uri"},
         "issue": {"type": "keyword"},
         "ISSNs": {"type": "keyword"},
         "label": {"type": "text"},
-        "journal": {"type": "keyword"},
-        "journals": {"type": "keyword"},
+        "journal": {"type": "keyword", "normalizer": "fedora_uri"},
+        "journals": {"type": "keyword", "normalizer": "fedora_uri"},
         "name": {"type": "text"},
         "nlmta": {"type": "keyword"},
         "oapCompliance": {"type": "keyword"},
         "orcid": {"type": "keyword"},
-        "pi": {"type": "keyword"},
+        "pi": {"type": "keyword", "normalizer": "fedora_uri"},
         "pmcParticipation": {"type": "keyword"},
         "projectName": {"type": "text", "copy_to": "projectName_suggest"},
         "projectName_suggest": {"type": "completion"},
@@ -59,7 +71,7 @@
         "steps": {"type": "keyword"},
         "type": {"type": "keyword"},
         "title": {"type": "text"},
-        "submissions": {"type": "keyword"},
+        "submissions": {"type": "keyword", "normalizer": "fedora_uri"},
         "submittedDate": {"type": "date"},
         "updatedDate": {"type": "date"},
         "uri": {"type": "keyword"},

@@ -40,6 +40,14 @@ curl -X POST "http://localhost:9200/pass/_search?pretty" -H 'Content-Type: appli
 '
 ```
 
+# Handline Fedora URIs
+
+In PASS, a Fedora resource can be addressed in two different ways, by a public URI or a private URI. The public URI must pass through Shibboleth and can be used by the public
+at large. The private URI is used by the backend services and allows them to avoid Shibboleth.
+
+A custom normalizer is defined to handle fields containing fedora URIs mapping them to their Fedora resource path. This allows searches to be done using either the public
+or private URI.
+
 # Command line tool
 
 The command line tool runs the indexer with the configuration either specifies as environment variable or system
