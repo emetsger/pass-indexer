@@ -7,7 +7,7 @@
       "char_filter" : {
         "fedora_uri_to_path" : {
           "type": "pattern_replace",
-          "pattern": "http://fcrepo:8080/fcrepo/rest|https://pass/fcrepo/rest",
+          "pattern": "\\Ahttp.*?/fcrepo/rest",
           "replacement": ""
         }
       },
