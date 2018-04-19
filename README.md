@@ -18,7 +18,10 @@ configured prefix, PI_TYPE_PREFIX, are handled. The id of the Elasticsearch docu
 
 # Auto-completion (suggestion) support
 
-If the mapping specifies any fields of the form NAME_suggest, they must be of type completion. The indexer will ensure that NAME_suggest fields are filled with the value of the NAME field if it exists. So in order to support auto-completion on a "awardNumber" field, specify a mapping of type complection for an awardNumber_suggest field.
+Suggestion is supported on field of type complection. In order to allow auto-completion on the values of a field
+NAME, add a mapping for NAME_suggest of type completion with a copy_to for NAME. The field NAME_suggest will
+be automatically populated with the contents of NAME.
+
 
 Then you can search like below to find awardNumbers beginning with "R".
 

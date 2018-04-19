@@ -93,9 +93,10 @@ public class ElasticSearchIndexerTest {
         // Healthy which is not in mapping should be removed
         assertFalse(payload.has("healthy"));
         
-        // Should have awardNumber_suggest added for awardNumber.
         assertEquals(res_json.get("awardNumber"), payload.get("awardNumber"));
-        assertEquals(res_json.get("awardNumber"), payload.get("awardNumber_suggest"));
+        
+        // Should have awardNumber_suggest added for awardNumber by Elasticsearch
+        //assertEquals(res_json.get("awardNumber"), payload.get("awardNumber_suggest"));
         
         assertEquals(res_json.get("@id"), payload.get("@id"));
         assertEquals(res_json.get("@type"), payload.get("@type"));        

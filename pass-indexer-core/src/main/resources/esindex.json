@@ -15,12 +15,13 @@
   },
   "mappings": {
     "_doc": {
+      "dynamic": false,      
       "properties": {
         "@id": {"type": "keyword"},
         "@type": {"type": "keyword"},        
         "abstract": {"type": "text"},
         "author": {"type": "keyword"},
-        "awardNumber": {"type": "keyword", "normalizer": "ignorecase"},
+        "awardNumber": {"type": "keyword", "normalizer": "ignorecase", "copy_to": "awardNumber_suggest"},
         "awardNumber_suggest": {"type": "completion"},
         "assignedId": {"type": "keyword"},
         "copis": {"type": "keyword"},
@@ -46,7 +47,7 @@
         "orcid": {"type": "keyword"},
         "pi": {"type": "keyword"},
         "pmcParticipation": {"type": "keyword"},
-        "projectName": {"type": "text"},
+        "projectName": {"type": "text", "copy_to": "projectName_suggest"},
         "projectName_suggest": {"type": "completion"},
         "publisher": {"type": "keyword"},
         "repo": {"type": "keyword"},

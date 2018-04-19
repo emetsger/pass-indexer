@@ -8,7 +8,6 @@ import java.util.Base64;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.json.JSONObject;
 import org.json.JSONTokener;
@@ -31,8 +30,7 @@ import okhttp3.Response;
  * 
  * The mapping in the index configuration is used to check JSON documents retrieved from Fedora 
  * before indexing. Properties which do not have a mapping or otherwise cannot be indexed are
- * logged and ignored. Properties of the form "NAME_suggest" must have type completion. Properties
- * of the form NAME are added by the indexer to the NAME_suggest field.
+ * logged and ignored.
  */
 public class ElasticSearchIndexer {
     public static final String FEDORA_ACCEPT_HEADER = "application/ld+json; profile=\"http://www.w3.org/ns/json-ld#compacted\"";
@@ -47,7 +45,6 @@ public class ElasticSearchIndexer {
     private final String fedora_cred;
     private final String es_index_url;
     private final Set<String> supported_fields;
-    private final Set<String> suggest_fields;
 
     /**
      * If the given Elasticsearch does not exist, create it using the built in configuration.
@@ -89,9 +86,6 @@ public class ElasticSearchIndexer {
         
         JSONObject props = config.getJSONObject("mappings").getJSONObject("_doc").getJSONObject("properties");
         this.supported_fields = new HashSet<>(props.keySet());
-        this.suggest_fields = supported_fields.stream().filter(f -> 
-        f.endsWith(SUGGEST_SUFFIX)).map(f -> 
-                f.substring(0, f.length() - SUGGEST_SUFFIX.length())).collect(Collectors.toSet());
     }
    
     // Create index es_index_url with the given configuration
@@ -189,13 +183,6 @@ public class ElasticSearchIndexer {
                 iter.remove();
             }
         }
-        
-        // ADD NAME_suggest for each suggestion field NAME
-        suggest_fields.forEach(f -> {
-            if (o.has(f)) {
-                o.put(f + SUGGEST_SUFFIX, o.get(f));
-            }
-        });
         
         return o.toString();
     }
