@@ -6,7 +6,7 @@
 
   <groupId>org.dataconservancy.pass</groupId>
   <artifactId>pass-indexer</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.2-SNAPSHOT</version>
 
   <packaging>pom</packaging>
   <name>pass indexer</name>
@@ -16,7 +16,6 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-    <commons-io.version>2.5</commons-io.version>
     <junit.version>4.12</junit.version>
     <activemq.version>5.14.4</activemq.version>
     <slf4j.version>1.7.25</slf4j.version>
