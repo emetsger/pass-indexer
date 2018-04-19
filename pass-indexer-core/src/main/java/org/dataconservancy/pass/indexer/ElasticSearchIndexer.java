@@ -37,7 +37,6 @@ public class ElasticSearchIndexer {
     public static final String FEDORA_PREFER_HEADER = "return=representation; omit=\"http://fedora.info/definitions/v4/repository#ServerManaged\"";
    
     private static final String ES_INDEX_CONFIG="/esindex.json";
-    private static final String SUGGEST_SUFFIX = "_suggest";    
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     private static final Logger LOG = LoggerFactory.getLogger(ElasticSearchIndexer.class);
 
