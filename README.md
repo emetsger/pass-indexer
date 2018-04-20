@@ -10,7 +10,8 @@ The pass-indexer monitors a JMS queue for messages about creation, deletion, and
 
 The Elasticsearch index is created on startup if it does not exist with a set [configuration](pass-indexer-core/src/main/resources/esindex.json).
 If the index does exist, the configuration is retrieved from the index. In either case the mapping must match the documents which will be indexed.
-The Elasticsearch document is the compact JSON-LD representation of that resource without server triples.
+The Elasticsearch document is the compact JSON-LD representation of that resource without server triples. If a key on the document is not present
+in the mapping for the index, then the key is removed from the document and a warning is logged.
 
 When there is a message about a resource of a type being monitored, the indexer either creates a corresponding document in Elasticsearch 
 from the Fedora resource, updates such a document, or deletes the document.  Only messages about a resource of a type which matches a
@@ -40,7 +41,7 @@ curl -X POST "http://localhost:9200/pass/_search?pretty" -H 'Content-Type: appli
 '
 ```
 
-# Handline Fedora URIs
+# Handling Fedora URIs
 
 In PASS, a Fedora resource can be addressed in two different ways, by a public URI or a private URI. The public URI must pass through Shibboleth and can be used by the public
 at large. The private URI is used by the backend services and allows them to avoid Shibboleth.
