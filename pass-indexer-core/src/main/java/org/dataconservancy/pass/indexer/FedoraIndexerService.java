@@ -8,9 +8,6 @@ import javax.jms.JMSException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// TODO Logging, exception handling
-// TODO Batch up index requests?
-// TODO Any reason to add a ExecutorService to the mix?
 
 /**
  * Setup a handler that reads Fedora events from a JMS queue and updates an
@@ -26,7 +23,8 @@ public class FedoraIndexerService implements AutoCloseable {
     private String elasticsearch_index_url;
     private String fedora_user;
     private String fedora_pass;
-
+    private String elasticsearch_index_config;
+    
     public void setJmsConnectionFactory(ConnectionFactory conf_fact) {
         this.jms_con_fact = conf_fact;
     }
@@ -41,6 +39,10 @@ public class FedoraIndexerService implements AutoCloseable {
 
     public void setElasticsearchIndexUrl(String elasticsearch_index_url) {
         this.elasticsearch_index_url = elasticsearch_index_url;
+    }
+    
+    public void setElasticsearchIndexConfig(String elasticsearch_index_config) {
+        this.elasticsearch_index_config = elasticsearch_index_config;
     }
 
     public void setFedoraUser(String fedora_user) {
@@ -64,7 +66,7 @@ public class FedoraIndexerService implements AutoCloseable {
     public void start() throws IOException {
         jms_client = new JmsClient(jms_con_fact);
 
-        ElasticSearchIndexer es = new ElasticSearchIndexer(elasticsearch_index_url, fedora_user, fedora_pass);
+        ElasticSearchIndexer es = new ElasticSearchIndexer(elasticsearch_index_url, elasticsearch_index_config, fedora_user, fedora_pass);
         
         jms_client.listen(jms_queue, msg -> {
             try {

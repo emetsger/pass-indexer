@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -30,7 +33,7 @@ import okhttp3.Response;
  * 
  * The mapping in the index configuration is used to check JSON documents retrieved from Fedora 
  * before indexing. Properties which do not have a mapping or otherwise cannot be indexed are
- * logged and ignored.
+ * logged and ignored. On start the index is checked.
  * 
  * Properties which contain Fedora URIs have a custom matching with causes them to be indexed as
  * Fedora resource paths. This allows a client to search using different URIs which map to the same
@@ -39,8 +42,10 @@ import okhttp3.Response;
 public class ElasticSearchIndexer {
     public static final String FEDORA_ACCEPT_HEADER = "application/ld+json; profile=\"http://www.w3.org/ns/json-ld#compacted\"";
     public static final String FEDORA_PREFER_HEADER = "return=representation; omit=\"http://fedora.info/definitions/v4/repository#ServerManaged\"";
-   
+    
+    // Resource path to provided Elasticsearch configuration for PASS.
     private static final String ES_INDEX_CONFIG = "/esindex.json";
+    
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     private static final Logger LOG = LoggerFactory.getLogger(ElasticSearchIndexer.class);
 
@@ -50,16 +55,16 @@ public class ElasticSearchIndexer {
     private final Set<String> supported_fields;
 
     /**
-     * If the given Elasticsearch does not exist, create it using the built in configuration.
+     * If the given Elasticsearch index does not exist, create it using the supplied configuration.
      * Otherwise the configuration is retrieved from the index.
      * 
-     * @param es_index_url 
+     * @param es_index_url
+     * @param es_index_config - Either file or resource path to index config. If null, use provided PASS configuration.
      * @param fedora_user
      * @param fedora_pass
-     * @param fedora_uri_pattern - Must match the part of the Fedura URI which is the the resource path.
      * @throws IOException
      */
-    public ElasticSearchIndexer(String es_index_url, String fedora_user, String fedora_pass) throws IOException {
+    public ElasticSearchIndexer(String es_index_url, String es_index_config, String fedora_user, String fedora_pass) throws IOException {
         this.client = new OkHttpClient();
         this.es_index_url = es_index_url.endsWith("/") ? es_index_url : es_index_url + "/";
         this.fedora_cred = Credentials.basic(fedora_user, fedora_pass);
@@ -67,8 +72,12 @@ public class ElasticSearchIndexer {
         JSONObject config = get_existing_index_configuration();
 
         if (config == null) {
-            LOG.info("Index does not exist. Creating " + es_index_url);
-            config = load_builtin_index_configuration();
+            if (es_index_config == null) {
+                es_index_config = ES_INDEX_CONFIG;
+            }
+            
+            LOG.info("Index does not exist. Creating " + es_index_url + " with config " + es_index_config);
+            config = load_index_configuration(es_index_config);
             create_index(config);
         } else {
             LOG.info("Found existing index " + es_index_url);
@@ -93,41 +102,62 @@ public class ElasticSearchIndexer {
     private void create_index(JSONObject config) throws IOException {
         RequestBody body = RequestBody.create(JSON, config.toString());
         Request put = new Request.Builder().url(es_index_url).put(body).build();
-        Response response = client.newCall(put).execute();
-        String result = response.body().string();
+        
+        try (Response response = client.newCall(put).execute()) {
+            String result = response.body().string();
 
-        if (response.isSuccessful()) {
-            LOG.info("Created index: " + es_index_url + "\n" + result);
-        } else {
-            String msg = "Failed to create index: " + es_index_url + "\n" + result;
-            LOG.error(msg);
-            throw new IOException(msg);
+            if (response.isSuccessful()) {
+                LOG.info("Created index: " + es_index_url + "\n" + result);
+            } else {
+                String msg = "Failed to create index: " + es_index_url + "\n" + result;
+                LOG.error(msg);
+                throw new IOException(msg);
+            }
         }
     }
     
-    // Return the index configuration built in to the module.
-    private JSONObject load_builtin_index_configuration() throws IOException {
-        try (InputStream is = this.getClass().getResourceAsStream(ES_INDEX_CONFIG)) {
-            return new JSONObject(new JSONTokener(is));
+    // Return the index configuration specifies as a file or resource. 
+    private JSONObject load_index_configuration(String es_index_config) throws IOException {
+        Path path = Paths.get(es_index_config);
+        
+        if (Files.exists(path)) {
+            LOG.info("Loading index configuration from file: " + es_index_config);
+
+            try (InputStream is = Files.newInputStream(path)) {
+                return new JSONObject(new JSONTokener(is));
+            }
+        } else {
+            LOG.info("Loading index configuration from classpath: " + es_index_config);
+            
+            try (InputStream is = this.getClass().getResourceAsStream(es_index_config)) {
+                if (is == null) {
+                    String msg = "Index configuration not found on classpath: " + es_index_config;
+                    LOG.error(msg);
+                    throw new IOException(msg);
+                }
+                
+                return new JSONObject(new JSONTokener(is));
+            }
         }
     }
     
     // Return the current index configuration or null if it does not exist.
     private JSONObject get_existing_index_configuration() throws IOException {
         Request get = new Request.Builder().url(es_index_url).build();
-        Response response = client.newCall(get).execute();
-
-        if (response.code() == 404) {
-            return null;
-        }
         
-        if (!response.isSuccessful()) {
-            String msg = "Failed to retrieve index config: " + es_index_url + " " + response.code();
-            LOG.error(msg);
-            throw new IOException(msg);
-        }
+        try (Response response = client.newCall(get).execute()) {
+            if (response.code() == 404) {
+                return null;
+            }
+        
+            if (!response.isSuccessful()) {
+                String msg = "Failed to retrieve index config: " + es_index_url + " " + response.code();
+                LOG.error(msg);
+                throw new IOException(msg);
+            }
 
-        return new JSONObject(response.body().string());
+            return new JSONObject(response.body().string());
+        }
     }
     
     // Return compact JSON-LD representation of Fedora resource without server triples
@@ -135,15 +165,15 @@ public class ElasticSearchIndexer {
         Request get = new Request.Builder().url(uri).header("Authorization", fedora_cred)
                 .header("Accept", FEDORA_ACCEPT_HEADER).header("Prefer", FEDORA_PREFER_HEADER).build();
 
-        Response response = client.newCall(get).execute();
+        try (Response response = client.newCall(get).execute()) {
+            if (!response.isSuccessful()) {
+                String msg = "Failed to retrieve Fedora resource: " + uri + " " + response.code();
+                LOG.error(msg);
+                throw new IOException(msg);
+            }
 
-        if (!response.isSuccessful()) {
-            String msg = "Failed to retrieve Fedora resource: " + uri + " " + response.code();
-            LOG.error(msg);
-            throw new IOException(msg);
+            return response.body().string();
         }
-
-        return response.body().string();
     }
     
     // Return URL safe base64 encoding of string.
@@ -199,15 +229,17 @@ public class ElasticSearchIndexer {
 
         RequestBody body = RequestBody.create(JSON, doc);
         Request post = new Request.Builder().url(doc_url).post(body).build();
-        Response response = client.newCall(post).execute();
-        String result = response.body().string();
+        
+        try (Response response = client.newCall(post).execute()) {
+            String result = response.body().string();
 
-        if (response.isSuccessful()) {
-            LOG.debug("Update success: " + response);
-        } else {
-            String msg = "Update failure: " + result; 
-            LOG.error(msg);
-            throw new IOException(msg);
+            if (response.isSuccessful()) {
+                LOG.debug("Update success: " + response);
+            } else {
+                String msg = "Update failure: " + result; 
+                LOG.error(msg);
+                throw new IOException(msg);
+            }
         }
     }
 
@@ -218,13 +250,15 @@ public class ElasticSearchIndexer {
         String doc_url = get_create_document_url(doc_id);
 
         Request delete = new Request.Builder().url(doc_url).delete().build();
-        Response response = client.newCall(delete).execute();
-        String result = response.body().string();
+        
+        try (Response response = client.newCall(delete).execute()) {
+            String result = response.body().string();
 
-        if (response.isSuccessful()) {
-            LOG.debug("Delete success: " + response);
-        } else {
-            LOG.error("Delete failed: " + result);
+            if (response.isSuccessful()) {
+                LOG.debug("Delete success: " + response);
+            } else {
+                LOG.error("Delete failed: " + result);
+            }
         }
     }
 

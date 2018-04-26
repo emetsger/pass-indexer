@@ -33,7 +33,7 @@ public class ElasticSearchIndexerTest {
         // PUT for Elasticsearch index config
         server.enqueue(new MockResponse().setBody("{}"));
         
-        indexer = new ElasticSearchIndexer(es_index_url.toString(), "admin", "admin");
+        indexer = new ElasticSearchIndexer(es_index_url.toString(), null, "admin", "admin");
         
         // Drain index config requests
         server.takeRequest();
