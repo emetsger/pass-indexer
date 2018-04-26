@@ -56,7 +56,7 @@
         "funder": {"type": "keyword", "normalizer": "fedora_uri"},
         "grants": {"type": "keyword", "normalizer": "fedora_uri"},
         "institution": {"type": "keyword"},
-        "institutionId": {"type": "keyword"},
+        "institutionalId": {"type": "keyword"},
         "issue": {"type": "keyword"},
         "issns": {"type": "keyword"},
         "lastName": {"type": "keyword"},
