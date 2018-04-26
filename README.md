@@ -9,6 +9,7 @@ The pass-indexer monitors a JMS queue for messages about creation, deletion, and
 (Fedora must be configured appropriately to setup this queue.)
 
 The Elasticsearch index is created on startup if it does not exist with a set [configuration](pass-indexer-core/src/main/resources/esindex.json).
+(That configuration default can be changed.)
 If the index does exist, the configuration is retrieved from the index. In either case the mapping must match the documents which will be indexed.
 The Elasticsearch document is the compact JSON-LD representation of that resource without server triples. If a key on the document is not present
 in the mapping for the index, then the key is removed from the document and a warning is logged.
@@ -58,7 +59,17 @@ Configuration properties:
 * PI_FEDORA_USER=admin
 * PI_FEDORA_PASS=admin
 * PI_ES_INDEX=http://elasticsearch:9200/pass/
+* PI_ES_CONFIG=/file/or/resource/path/config.json
 * PI_FEDORA_JMS_BROKER=tcp://fcrepo:61616
 * PI_FEDORA_JMS_QUEUE=fedora
 * PI_TYPE_PREFIX=http://example.org/pass/
 * PI_LOG_LEVEL=debug
+
+
+The PI_FEDORA_USER and PI_FEDORA_PASS are the credentials used to connect to Fedora with basic auth.
+
+The PI_ES_INDEX is the index where Fedora documents are sent. If PI_ES_CONFIG is set to a file or
+a classpath resource, it will be used as the Elasticsearch index configuration if the index does not
+exist and is created.
+
+
