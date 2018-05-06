@@ -207,6 +207,7 @@ public class ElasticSearchIndexer {
             if (!supported_fields.contains(key)) {
                 LOG.warn("Unexpected property ignored: " + key + ", " + value);
                 iter.remove();
+                continue;
             }
             
             if (JSONObject.class.isInstance(value)) {
