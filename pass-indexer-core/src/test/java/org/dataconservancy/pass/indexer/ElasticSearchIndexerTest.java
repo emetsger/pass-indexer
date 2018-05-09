@@ -3,6 +3,7 @@ package org.dataconservancy.pass.indexer;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -107,6 +108,33 @@ public class ElasticSearchIndexerTest {
     }
     
     @Test
+    public void testCreateMessageIgnore410() throws Exception {
+        // Mock message about created Fedora resource
+        // But get a a 410 tombstone when requesting resource
+
+        String fedora_res_uri = server.url("/fcrepo/cow/moo").toString();
+
+        // GET for Fedora resource
+        server.enqueue(new MockResponse().setResponseCode(410));
+
+        FedoraMessage m = new FedoraMessage();
+        m.setAction(FedoraAction.CREATED);
+        m.setResourceURI(fedora_res_uri);
+
+        indexer.handle(m);
+
+        // Check the requests
+        
+        RecordedRequest fedora_get = server.takeRequest();
+
+        assertEquals("GET", fedora_get.getMethod());
+        assertNotNull(fedora_get.getHeader("Authorization"));
+        assertEquals(ElasticSearchIndexer.FEDORA_ACCEPT_HEADER, fedora_get.getHeader("Accept"));
+        assertEquals(ElasticSearchIndexer.FEDORA_PREFER_HEADER, fedora_get.getHeader("Prefer"));
+        assertEquals(fedora_res_uri, fedora_get.getRequestUrl().toString());
+    }
+    
+    @Test
     public void testModifyMessage() throws Exception {
         // Mock message about modified Fedora resource
 
@@ -174,5 +202,5 @@ public class ElasticSearchIndexerTest {
         assertEquals("DELETE", delete.getMethod());
         
         assertTrue(delete.getRequestUrl().toString().startsWith(es_index_url.toString()));
-    }
+   }
 }

@@ -140,7 +140,8 @@ public class ElasticSearchIndexer {
             }
         }
     }
-    
+    // Fedora resource was deleted
+
     // Return the current index configuration or null if it does not exist.
     private JSONObject get_existing_index_configuration() throws IOException {
         Request get = new Request.Builder().url(es_index_url).build();
@@ -161,12 +162,17 @@ public class ElasticSearchIndexer {
     }
     
     // Return compact JSON-LD representation of Fedora resource without server triples
+    // Return null if resource is now a tombstone.
     private String get_fedora_resource(String uri) throws IOException {
         Request get = new Request.Builder().url(uri).header("Authorization", fedora_cred)
                 .header("Accept", FEDORA_ACCEPT_HEADER).header("Prefer", FEDORA_PREFER_HEADER).build();
 
         try (Response response = client.newCall(get).execute()) {
             if (!response.isSuccessful()) {
+                if (response.code() == 410) {
+                    return null;
+                }
+                
                 String msg = "Failed to retrieve Fedora resource: " + uri + " " + response.code();
                 LOG.error(msg);
                 throw new IOException(msg);
@@ -192,7 +198,6 @@ public class ElasticSearchIndexer {
 
     // Do any normalization necessary before indexing.
     // Remove properties not in the index mapping
-    // For each NAME_suggest, add NAME to NAME_suggest.
     private String normalize_document(String json) {
         JSONObject o = new JSONObject(json);
 
@@ -207,10 +212,7 @@ public class ElasticSearchIndexer {
             if (!supported_fields.contains(key)) {
                 LOG.warn("Unexpected property ignored: " + key + ", " + value);
                 iter.remove();
-                continue;
-            }
-            
-            if (JSONObject.class.isInstance(value)) {
+            } else if (JSONObject.class.isInstance(value)) {
                 LOG.warn("Property with object value ignored: " + key + ", " + value);
                 iter.remove();
             }
@@ -220,11 +222,18 @@ public class ElasticSearchIndexer {
     }
 
     // Create or update the document corresponding to a Fedora resource in Elasticsearch.
-    // For simplicity the document id is the base64 encoded Fedora URI.
     private void update_document(String fedora_uri) throws IOException {
         LOG.debug("Updating document for Fedora resource: " + fedora_uri);
 
-        String doc = normalize_document(get_fedora_resource(fedora_uri));
+        String fedora_json = get_fedora_resource(fedora_uri);
+
+        if (fedora_json == null) {
+            // Fedora resource was deleted. Assume a delete message is coming.
+            LOG.debug("Fedora resource was deleted: " + fedora_uri);
+            return;
+        }
+        
+        String doc = normalize_document(fedora_json);
         String doc_id = get_document_id(fedora_uri);
         String doc_url = get_create_document_url(doc_id);
 
