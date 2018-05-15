@@ -9,9 +9,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 import org.slf4j.Logger;
@@ -46,6 +47,7 @@ public class ElasticSearchIndexer {
     // Resource path to provided Elasticsearch configuration for PASS.
     private static final String ES_INDEX_CONFIG = "/esindex.json";
     
+    private static final String SUGGEST_SUFFIX = "_suggest";
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     private static final Logger LOG = LoggerFactory.getLogger(ElasticSearchIndexer.class);
 
@@ -53,7 +55,11 @@ public class ElasticSearchIndexer {
     private final String fedora_cred;
     private final String es_index_url;
     private final Set<String> supported_fields;
-
+    
+    // Fields which have a _suggest companion field of type completion.
+    private final Set<String> suggest_fields; 
+    
+    
     /**
      * If the given Elasticsearch index does not exist, create it using the supplied configuration.
      * Otherwise the configuration is retrieved from the index.
@@ -96,6 +102,8 @@ public class ElasticSearchIndexer {
         
         JSONObject props = config.getJSONObject("mappings").getJSONObject("_doc").getJSONObject("properties");
         this.supported_fields = new HashSet<>(props.keySet());
+        this.suggest_fields = supported_fields.stream().filter(f -> f.endsWith(SUGGEST_SUFFIX)).map(f -> 
+                f.substring(0, f.length() - SUGGEST_SUFFIX.length())).collect(Collectors.toSet());
     }
    
     // Create index es_index_url with the given configuration
@@ -140,7 +148,6 @@ public class ElasticSearchIndexer {
             }
         }
     }
-    // Fedora resource was deleted
 
     // Return the current index configuration or null if it does not exist.
     private JSONObject get_existing_index_configuration() throws IOException {
@@ -197,28 +204,51 @@ public class ElasticSearchIndexer {
     }
 
     // Do any normalization necessary before indexing.
-    // Remove properties not in the index mapping
+    // Ignore and warn about keys not in the configuration or with object values
+    
     private String normalize_document(String json) {
         JSONObject o = new JSONObject(json);
-
-        // TODO For the moment remove inline @context which Elasticsearch cannot handle
-        o.remove("@context");
         
-        // Ignore and warn about keys not in the configuration or with object values
-        for (Iterator<String> iter = o.keys(); iter.hasNext(); ) {
-            String key = iter.next();
+        for (String key: JSONObject.getNames(o)) {
             Object value = o.get(key);
-            
+
             if (!supported_fields.contains(key)) {
                 LOG.warn("Unexpected property ignored: " + key + ", " + value);
-                iter.remove();
+                o.remove(key);
             } else if (JSONObject.class.isInstance(value)) {
                 LOG.warn("Property with object value ignored: " + key + ", " + value);
-                iter.remove();
+                o.remove(key);
+            } else if (suggest_fields.contains(key)) {
+                o.put(key + SUGGEST_SUFFIX, construct_completions(value.toString(), o));
             }
         }
         
         return o.toString();
+    }
+
+    private JSONArray construct_completions(String text, JSONObject o) {
+        JSONArray result = new JSONArray();
+        
+        int completion = 0;
+        boolean whitespace = true;
+        
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            
+            if (whitespace) {
+                if (!Character.isWhitespace(c)) {
+                    whitespace = false;
+                    
+                    result.put(completion++, text.substring(i));
+                }
+            } else  {
+                if (Character.isWhitespace(c)) {
+                    whitespace = true;
+                }
+            }
+        }
+                
+        return result;
     }
 
     // Create or update the document corresponding to a Fedora resource in Elasticsearch.
@@ -267,7 +297,7 @@ public class ElasticSearchIndexer {
             if (response.isSuccessful()) {
                 LOG.debug("Delete success: " + response);
             } else {
-                LOG.error("Delete failed: " + result);
+                LOG.warn("Delete failed: " + result);
             }
         }
     }
