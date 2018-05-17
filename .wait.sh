@@ -1,9 +1,7 @@
 #! /bin/sh
 
-# Argument should be indexer jar to run.
-# Wait until we get a 200 from Fedora or fail some number of times.
-# Then start indexer.
-
+# Read docker configuration
+. .env
 
 function wait_until_fedora_up {
     CMD="curl -I -u ${PI_FEDORA_USER}:${PI_FEDORA_PASS} --write-out %{http_code} --silent -o /dev/stderr ${PI_FEDORA_INTERNAL_BASE}"
@@ -61,5 +59,3 @@ function wait_until_es_up {
 
 wait_until_fedora_up
 wait_until_es_up
-
-exec java -Dorg.slf4j.simpleLogger.defaultLogLevel=${PI_LOG_LEVEL} -jar "$1"
