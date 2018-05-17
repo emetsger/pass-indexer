@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import okhttp3.Credentials;
-import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -40,15 +39,11 @@ import okhttp3.Response;
  * Fedora resource paths. This allows a client to search using different URIs which map to the same
  * Fedora resource.
  */
-public class ElasticSearchIndexer {
-    public static final String FEDORA_ACCEPT_HEADER = "application/ld+json; profile=\"http://www.w3.org/ns/json-ld#compacted\"";
-    public static final String FEDORA_PREFER_HEADER = "return=representation; omit=\"http://fedora.info/definitions/v4/repository#ServerManaged\"";
-    
+public class ElasticSearchIndexer implements IndexerConstants {
     // Resource path to provided Elasticsearch configuration for PASS.
     private static final String ES_INDEX_CONFIG = "/esindex.json";
     
     private static final String SUGGEST_SUFFIX = "_suggest";
-    private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     private static final Logger LOG = LoggerFactory.getLogger(ElasticSearchIndexer.class);
 
     private final OkHttpClient client;

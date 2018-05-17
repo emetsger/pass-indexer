@@ -18,7 +18,7 @@ import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import okhttp3.mockwebserver.RecordedRequest;
 
-public class ElasticSearchIndexerTest {
+public class ElasticSearchIndexerTest implements IndexerConstants {
     private MockWebServer server;
     private ElasticSearchIndexer indexer;
     private HttpUrl es_index_url;
@@ -81,8 +81,8 @@ public class ElasticSearchIndexerTest {
 
         assertEquals("GET", fedora_get.getMethod());
         assertNotNull(fedora_get.getHeader("Authorization"));
-        assertEquals(ElasticSearchIndexer.FEDORA_ACCEPT_HEADER, fedora_get.getHeader("Accept"));
-        assertEquals(ElasticSearchIndexer.FEDORA_PREFER_HEADER, fedora_get.getHeader("Prefer"));
+        assertEquals(FEDORA_ACCEPT_HEADER, fedora_get.getHeader("Accept"));
+        assertEquals(FEDORA_PREFER_HEADER, fedora_get.getHeader("Prefer"));
         assertEquals(fedora_res_uri, fedora_get.getRequestUrl().toString());
 
         RecordedRequest es_post = server.takeRequest();
@@ -137,8 +137,8 @@ public class ElasticSearchIndexerTest {
 
         assertEquals("GET", fedora_get.getMethod());
         assertNotNull(fedora_get.getHeader("Authorization"));
-        assertEquals(ElasticSearchIndexer.FEDORA_ACCEPT_HEADER, fedora_get.getHeader("Accept"));
-        assertEquals(ElasticSearchIndexer.FEDORA_PREFER_HEADER, fedora_get.getHeader("Prefer"));
+        assertEquals(FEDORA_ACCEPT_HEADER, fedora_get.getHeader("Accept"));
+        assertEquals(FEDORA_PREFER_HEADER, fedora_get.getHeader("Prefer"));
         assertEquals(fedora_res_uri, fedora_get.getRequestUrl().toString());
     }
     
@@ -173,8 +173,8 @@ public class ElasticSearchIndexerTest {
 
         assertEquals("GET", get.getMethod());
         assertNotNull(get.getHeader("Authorization"));
-        assertEquals(ElasticSearchIndexer.FEDORA_ACCEPT_HEADER, get.getHeader("Accept"));
-        assertEquals(ElasticSearchIndexer.FEDORA_PREFER_HEADER, get.getHeader("Prefer"));
+        assertEquals(FEDORA_ACCEPT_HEADER, get.getHeader("Accept"));
+        assertEquals(FEDORA_PREFER_HEADER, get.getHeader("Prefer"));
         assertEquals(fedora_res_uri, get.getRequestUrl().toString());
 
         RecordedRequest post = server.takeRequest();
