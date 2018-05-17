@@ -47,7 +47,7 @@
         "description": {"type": "text"},
         "directFunder": {"type": "keyword", "normalizer": "fedora_uri"},
         "displayName": {"type": "text"},        
-        "doi": {"type": "keyword"},
+        "doi": {"type": "keyword", "normalizer": "ignorecase"},
         "email": {"type": "keyword"},
         "endDate": {"type": "date"},
         "externalIds": {"type": "keyword", "normalizer": "fedora_uri"},
