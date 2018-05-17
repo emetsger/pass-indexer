@@ -221,6 +221,9 @@ public class ElasticSearchIndexer implements IndexerConstants {
         return o.toString();
     }
 
+    // Text with n tokens separated by whitespace is turned into n completions,
+    // one for each token. Each completion starts at the token and finishes at
+    // the end of the text.
     private JSONArray construct_completions(String text, JSONObject o) {
         JSONArray result = new JSONArray();
         
