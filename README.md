@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/OA-PASS/pass-indexer.png?branch=master)](https://travis-ci.org/OA-PASS/pass-indexer)
+
+
 # Introduction
 
 The pass-indexer keeps an [Elasticsearch](https://github.com/elastic/elasticsearch) index up to date with resources in a
