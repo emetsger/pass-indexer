@@ -1,0 +1,20 @@
+language: java
+
+sudo: false
+dist: trusty
+
+services:
+  - docker
+
+cache:
+    directories:
+      - $HOME/.m2
+
+before_script:
+  - docker-compose pull
+  - docker-compose up -d
+  - bash .wait.sh
+  - docker-compose ps
+
+script:
+  - mvn verify
