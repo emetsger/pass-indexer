@@ -83,7 +83,7 @@ public class FedoraMessage {
 
     @Override
     public String toString() {
-        return "FedoraMessage [res=" + res_uri + ", types=" + Arrays.toString(res_types) + ", action=" + action + "]";
+        return action + " " + res_uri;
     }
 }
 

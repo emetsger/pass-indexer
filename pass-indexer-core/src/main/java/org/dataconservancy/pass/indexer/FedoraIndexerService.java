@@ -74,8 +74,6 @@ public class FedoraIndexerService implements AutoCloseable {
 
                 boolean should_handle = should_handle(fedora_msg);
 
-                LOG.debug("Fedora message:" + fedora_msg + "; handle: " + should_handle);
-
                 if (should_handle) {
                     es.handle(fedora_msg);
                 }
