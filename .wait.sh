@@ -4,7 +4,7 @@
 . .env
 
 function wait_until_fedora_up {
-    CMD="curl -I -u ${PI_FEDORA_USER}:${PI_FEDORA_PASS} --write-out %{http_code} --silent -o /dev/stderr ${PI_FEDORA_INTERNAL_BASE}"
+    CMD="curl -I -u ${PI_FEDORA_USER}:${PI_FEDORA_PASS} --write-out %{http_code} --silent -o /dev/stderr ${PI_FEDORA_BASE}"
     echo "Waiting for response from Fedora via ${CMD}"
 
     RESULT=0
