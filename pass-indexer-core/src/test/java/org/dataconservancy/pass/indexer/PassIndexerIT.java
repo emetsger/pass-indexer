@@ -5,6 +5,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.json.JSONArray;
@@ -22,6 +25,8 @@ import okhttp3.Response;
 
 /**
  * IT that depends on docker setup in docker-compose.yml.
+ * 
+ * The tests do not clean up after themselves, but are written so that they should generally succeed anyway.
  */
 public class PassIndexerIT implements IndexerConstants {
 	private static final String fedora_base_uri = "http://localhost:8080/fcrepo/rest/";
@@ -135,6 +140,29 @@ public class PassIndexerIT implements IndexerConstants {
 
 		return query;
 	}
+	
+	private JSONObject create_completion_query(String field, String prefix, JSONObject context) {
+		JSONObject query = new JSONObject();
+		JSONObject suggest= new JSONObject();
+		JSONObject field_suggest = new JSONObject();
+		JSONObject completion = new JSONObject();
+		
+		completion.put("field", field + "_suggest");
+		completion.put("size", 100);
+		
+		if (context != null) {
+			completion.put("context", context);
+		}
+		
+		field_suggest.put("prefix", prefix);
+		field_suggest.put("completion", completion);		
+
+		suggest.put(field, field_suggest);
+		
+		query.put("suggest", suggest);
+
+		return query;
+	}
 
 	private JSONObject execute_es_id_query(String uri) throws Exception {
 		JSONObject result = execute_es_query(create_term_query("@id", uri));
@@ -224,6 +252,12 @@ public class PassIndexerIT implements IndexerConstants {
 		assertFalse(is_fedora_resource_indexed(uri));
 	}
 
+	private String get_fedora_resource_path(String uri) {
+		String marker = "/rest";
+		int i = uri.indexOf(marker);
+		return uri.substring(i + marker.length());
+	}
+	
 	// Show that Fedora resources can be searched for by resource path.
 	// See the Es mapping configuration for pass.
 	@Test
@@ -235,12 +269,95 @@ public class PassIndexerIT implements IndexerConstants {
 		Thread.sleep(WAIT_TIME);
 		
 		assertTrue(is_fedora_resource_indexed(uri));
-		
-		String marker = "/rest";
-		int i = uri.indexOf(marker);
-		String path = uri.substring(i + + marker.length());
-		System.err.println(path);
+		assertTrue(is_fedora_resource_indexed(get_fedora_resource_path(uri)));
+	}
+	
+	// Show that journalName supports completion
+	// A completion can start at any word.
+	@Test
+	public void testCompletion() throws Exception {
+		JSONObject journal1 = create_pass_object("Journal");
+		journal1.put("journalName", "Cows and other mammals.");
 
-		assertTrue(is_fedora_resource_indexed(path));
+		JSONObject journal2 = create_pass_object("Journal");
+		journal2.put("journalName", "Consider the cow.");
+		
+		JSONObject journal3 = create_pass_object("Journal");
+		journal3.put("journalName", "Squirrels, cows, and bunnies");
+		
+		String uri1 = post_fedora_resource("journals", journal1);
+		String uri2 = post_fedora_resource("journals", journal2);
+		String uri3 = post_fedora_resource("journals", journal3);
+		
+		Thread.sleep(WAIT_TIME);
+		
+		assertTrue(is_fedora_resource_indexed(uri1));
+		assertTrue(is_fedora_resource_indexed(uri2));
+		assertTrue(is_fedora_resource_indexed(uri3));
+	
+		JSONObject result = execute_es_query(create_completion_query("journalName", "co", null));
+		JSONObject completions = result.getJSONObject("suggest").getJSONArray("journalName").getJSONObject(0);
+
+		// Check that each journal is suggested
+		
+		List<String> suggested = new ArrayList<>();
+		
+		completions.getJSONArray("options").forEach(o -> {
+			suggested.add(JSONObject.class.cast(o).getJSONObject("_source").getString("@id"));
+		});
+		
+		Arrays.asList(uri1, uri2, uri3).forEach(uri -> {
+			assertTrue("Suggestion should contain " + uri, suggested.contains(uri));
+		});
+	}
+	
+	// Show that projectName supports completion with a pi category.
+	@Test
+	public void testCompletionWithContext() throws Exception {
+		// Create PIs
+		
+		JSONObject pi1 = create_pass_object("User");
+		pi1.put("username", "bobafett");
+		pi1.put("email", "boba@example.org");
+		
+		JSONObject pi2 = create_pass_object("User");
+		pi2.put("username", "ackbar");
+		pi2.put("email", "itsatrap@example.org");
+
+		String pi1_uri = post_fedora_resource("users", pi1);
+		String pi2_uri = post_fedora_resource("users", pi2);
+		
+		Thread.sleep(WAIT_TIME);
+		
+		// Create grant for each PI
+
+		JSONObject grant1 = create_pass_object("Grant");
+		grant1.put("projectName", "Ice Cream: Chocolate or Vanilla?");
+		grant1.put("pi", pi1_uri);
+
+		JSONObject grant2 = create_pass_object("Grant");
+		grant2.put("projectName", "Making Excellent Ice Cream");
+		grant2.put("pi", pi2_uri);
+
+		String grant1_uri = post_fedora_resource("grants", grant1);
+		String grant2_uri = post_fedora_resource("grants", grant2);
+		
+		Thread.sleep(WAIT_TIME);
+		
+		assertTrue(is_fedora_resource_indexed(pi1_uri));
+		assertTrue(is_fedora_resource_indexed(pi2_uri));
+		assertTrue(is_fedora_resource_indexed(grant1_uri));
+		assertTrue(is_fedora_resource_indexed(grant2_uri));
+	
+		// The prefix cre matches both grants, context should only match pi1
+		JSONObject context = new JSONObject();
+		context.put("pi", get_fedora_resource_path(pi1_uri));
+		
+		JSONObject result = execute_es_query(create_completion_query("projectName", "cre", context));
+		JSONObject completions = result.getJSONObject("suggest").getJSONArray("projectName").getJSONObject(0);
+		JSONArray options = completions.getJSONArray("options");
+				
+		assertEquals(1, options.length());
+		assertEquals(pi1_uri, options.getJSONObject(0).getJSONObject("_source").getString("pi"));
 	}
 }
