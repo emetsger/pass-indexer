@@ -37,7 +37,7 @@
         "affiliation": {"type": "text"},
         "aggregatedDepositStatus": {"type": "keyword"},
         "awardDate": {"type": "date"},        
-        "awardNumber": {"type": "keyword", "normalizer": "ignorecase"},
+        "awardNumber": {"type": "keyword", "normalizer": "ignorecase", "contexts": [{"name": "pi", "type": "category", "path": "pi"}]},
         "awardNumber_suggest": {"type": "completion"},
         "awardStatus": {"type": "keyword"},        
         "coPis": {"type": "keyword", "normalizer": "fedora_uri"},
