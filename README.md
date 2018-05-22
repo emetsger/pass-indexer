@@ -76,6 +76,14 @@ at large. The private URI is used by the backend services and allows them to avo
 A custom normalizer is defined to handle fields containing fedora URIs mapping them to their Fedora resource path. This allows searches to be done using either the public
 or private URI.
 
+# Award Number normalization
+
+A custom normalizer is defined to help searching award numbers.
+
+* Ignore case
+* Strip out whitspace, dashes, and periods
+* Ignore zero padding in NIH award numbers.
+
 # Command line tool
 
 The command line tool runs the indexer with the configuration either specifies as environment variable or system
