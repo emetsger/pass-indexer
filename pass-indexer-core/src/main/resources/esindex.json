@@ -9,6 +9,16 @@
           "type": "pattern_replace",
           "pattern": "\\Ahttp.*?/fcrepo/rest",
           "replacement": ""
+        },
+        "nih_zero_ignore" : {
+          "type": "pattern_replace",
+          "pattern": "\\A([A-Za-z]\\w\\d)\\s*([A-Za-z][A-Za-z])(0*)",
+          "replacement": "$1$2"
+        },
+        "period_dash_whitespace_ignore" : {
+          "type": "pattern_replace",
+          "pattern": "\\.|-|\\s",
+          "replacement": ""
         }
       },
       "normalizer": {
@@ -21,6 +31,11 @@
           "type": "custom",
           "char_filter": ["fedora_uri_to_path"],
           "filter": []
+        },
+        "award_number": {
+          "type": "custom",
+          "char_filter": ["period_dash_whitespace_ignore", "nih_zero_ignore"],
+          "filter": ["lowercase", "asciifolding"]
         }
       }
     }
@@ -37,7 +52,7 @@
         "affiliation": {"type": "text"},
         "aggregatedDepositStatus": {"type": "keyword"},
         "awardDate": {"type": "date"},        
-        "awardNumber": {"type": "keyword", "normalizer": "ignorecase"},
+        "awardNumber": {"type": "keyword", "normalizer": "award_number"},
         "awardNumber_suggest": {"type": "completion", "contexts": [{"name": "pi", "type": "category", "path": "pi"}]},
         "awardStatus": {"type": "keyword"},        
         "coPis": {"type": "keyword", "normalizer": "fedora_uri"},
