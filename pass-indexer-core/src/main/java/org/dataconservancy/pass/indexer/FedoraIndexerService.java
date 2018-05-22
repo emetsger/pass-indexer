@@ -76,6 +76,8 @@ public class FedoraIndexerService implements AutoCloseable {
 
                 if (should_handle) {
                     es.handle(fedora_msg);
+                } else {
+                	LOG.debug("Ignore Fedora message without known RDF type: " + fedora_msg);
                 }
             } catch (IOException | JMSException e) {
                 throw new RuntimeException(e);
