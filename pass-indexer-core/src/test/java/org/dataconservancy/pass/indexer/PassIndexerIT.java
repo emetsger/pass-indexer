@@ -33,7 +33,7 @@ public class PassIndexerIT implements IndexerConstants {
 	private static final String fedora_base_uri = "http://localhost:8080/fcrepo/rest/";
 	private static final String es_uri = "http://localhost:9200/_search";
 	private static final MediaType JSON_LD = MediaType.parse("application/ld+json; charset=utf-8");
-	private static final int WAIT_TIME = 10 * 1000;
+	private static final int WAIT_TIME = 20 * 1000;
 
 	private static FedoraIndexerService serv;
 	private static OkHttpClient client;
