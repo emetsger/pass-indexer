@@ -17,4 +17,4 @@ before_script:
   - docker-compose ps
 
 script:
-  - mvn verify
+  - mvn -Dorg.slf4j.simpleLogger.defaultLogLevel=debug verify
