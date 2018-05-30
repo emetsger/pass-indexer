@@ -67,6 +67,7 @@ public class ElasticSearchIndexer implements IndexerConstants {
      */
     public ElasticSearchIndexer(String es_index_url, String es_index_config, String fedora_user, String fedora_pass) throws IOException {
         this.client = new OkHttpClient();
+        
         this.es_index_url = es_index_url.endsWith("/") ? es_index_url : es_index_url + "/";
         this.fedora_cred = Credentials.basic(fedora_user, fedora_pass);
         

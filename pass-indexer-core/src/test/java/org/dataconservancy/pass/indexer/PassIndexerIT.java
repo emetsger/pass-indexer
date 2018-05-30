@@ -14,6 +14,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import okhttp3.Credentials;
@@ -312,7 +313,9 @@ public class PassIndexerIT implements IndexerConstants {
 	}
 	
 	// Show that projectName supports completion with a pi category.
+	// No longer needed so removed from index config.
 	@Test
+	@Ignore
 	public void testCompletionWithContext() throws Exception {
 		// Create PIs
 		

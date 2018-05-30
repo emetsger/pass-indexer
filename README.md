@@ -23,15 +23,15 @@ configured prefix, PI_TYPE_PREFIX, are handled. The id of the Elasticsearch docu
 
 # Auto-completion (suggestion) support
 
-Suggestion is supported on field of type complection. In order to allow auto-completion on the values of a field
+Suggestion is supported on field of type completion. In order to allow auto-completion on the values of a field
 NAME, add a mapping for NAME_suggest of type completion. The field NAME_suggest will be automatically populated with the
 contents of NAME by the indexer. The content of NAME will have a completion for the substring starting at each token. So
 if the content is "token1 token2 token3", there will be completions, "token1 token2 token3", "token2 token3", and "token3".
 
-A consquence of the auto-completion is that NAME_suggest fields will appear in the _source document returned by Elasticsearch.
+A consequence of the auto-completion is that NAME_suggest fields will appear in the _source document returned by Elasticsearch.
 See https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-source-filtering.html for options.
 
-You can search like below to find awardNumbers beginning with "R".
+You can search like below to find journName with a word beginning with "R".
 
 ```
 curl -X POST "http://localhost:9200/pass/_search?pretty" -H 'Content-Type: application/json' -d'
@@ -40,7 +40,7 @@ curl -X POST "http://localhost:9200/pass/_search?pretty" -H 'Content-Type: appli
         "my-suggest" : {
             "prefix" : "R", 
             "completion" : { 
-                "field" : "awardNumber_suggest" 
+                "field" : "journalName_suggest" 
             }
         }
     }
@@ -48,25 +48,6 @@ curl -X POST "http://localhost:9200/pass/_search?pretty" -H 'Content-Type: appli
 '
 ```
 
-In addition the projectName_suggest field is configured to have a category named pi with values of the pi field. Due to how Fedora URIs are handled, that value will be the resource path of the pi in Fedora.
-
-Example doing a completion and restricting to a pi `http://localhost:8080/fcrepo/rest/users/ba/ea/af/8c/baeaaf8c-dfec-4681-a527-1711a453a2ed`. Generally the resource path can be produced from a Fedora uri by stripping off the prefix ending in `/rest`.
-
-
-```
- curl 'http://localhost:9200/pass/_search?pretty' -H 'Content-Type: application/json; charset=UTF-8' --data-binary '
- {
-    "suggest": {
-        "projectName": {
-            "prefix": "cre",
-            "completion": {
-                "field": "projectName_suggest",
-                "context": {"pi": "/users/ba/ea/af/8c/baeaaf8c-dfec-4681-a527-1711a453a2ed"}
-            }
-        }
-    }
-}'
-```
 
 # Handling Fedora URIs
 
@@ -81,8 +62,8 @@ or private URI.
 A custom normalizer is defined to help searching award numbers.
 
 * Ignore case
-* Strip out whitspace, dashes, and periods
-* Ignore zero padding in NIH award numbers.
+* Strip out whitespace, dashes, and periods
+* Ignore the first 3 characters and zero padding in NIH award numbers.
 
 # Command line tool
 

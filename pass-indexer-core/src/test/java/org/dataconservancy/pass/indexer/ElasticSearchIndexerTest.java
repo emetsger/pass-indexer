@@ -59,8 +59,7 @@ public class ElasticSearchIndexerTest implements IndexerConstants {
                 "https://raw.githubusercontent.com/OA-PASS/ember-fedora-adapter/master/tests/dummy/public/farm.jsonld");
         res_json.put("healthy", true);
         res_json.put("awardNumber", "abc123");
-        res_json.put("projectName", "This is an amazing project");
-        res_json.put("journalName", "   ");
+        res_json.put("journalName", "This is the best journal");
         res_json.put("name", "moo");
 
         // GET for Fedora resource
@@ -96,15 +95,15 @@ public class ElasticSearchIndexerTest implements IndexerConstants {
         // Healthy which is not in mapping should be removed
         assertFalse(payload.has("healthy"));
         
-        assertEquals(res_json.get("projectName"), payload.get("projectName"));
+        assertEquals(res_json.get("journalName"), payload.get("journalName"));
         
         // Should have projectName_suggest added for projectName by Elasticsearch 
         // Should be completion for each word.
-        String proj = res_json.get("projectName").toString();
-        JSONArray completions = payload.getJSONArray("projectName_suggest");
+        String journal = res_json.get("journalName").toString();
+        JSONArray completions = payload.getJSONArray("journalName_suggest");
         assertEquals(5, completions.length());
         completions.forEach(o -> {
-            assertTrue(proj.contains(o.toString()));
+            assertTrue(journal.contains(o.toString()));
         });
         
         assertEquals(res_json.get("@id"), payload.get("@id"));

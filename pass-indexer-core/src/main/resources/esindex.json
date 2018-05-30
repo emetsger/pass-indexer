@@ -13,7 +13,7 @@
         "nih_zero_ignore" : {
           "type": "pattern_replace",
           "pattern": "\\A([A-Za-z]\\w\\d)\\s*([A-Za-z][A-Za-z])(0*)",
-          "replacement": "$1$2"
+          "replacement": "$2"
         },
         "period_dash_whitespace_ignore" : {
           "type": "pattern_replace",
@@ -53,7 +53,6 @@
         "aggregatedDepositStatus": {"type": "keyword"},
         "awardDate": {"type": "date"},        
         "awardNumber": {"type": "keyword", "normalizer": "award_number"},
-        "awardNumber_suggest": {"type": "completion", "contexts": [{"name": "pi", "type": "category", "path": "pi"}]},
         "awardStatus": {"type": "keyword"},        
         "coPis": {"type": "keyword", "normalizer": "fedora_uri"},
         "copyStatus": {"type": "keyword"},        
@@ -93,7 +92,6 @@
         "policyUrl": {"type": "keyword"},
         "primaryFunder": {"type": "keyword", "normalizer": "fedora_uri"},        
         "projectName": {"type": "text"},
-        "projectName_suggest": {"type": "completion", "contexts": [{"name": "pi", "type": "category", "path": "pi"}]},
         "publisher": {"type": "keyword", "normalizer": "fedora_uri"},
         "publication": {"type": "keyword", "normalizer": "fedora_uri"},        
         "repository": {"type": "keyword", "normalizer": "fedora_uri"},
