@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.json.JSONArray;
@@ -66,8 +67,7 @@ public class ElasticSearchIndexer implements IndexerConstants {
      * @throws IOException
      */
     public ElasticSearchIndexer(String es_index_url, String es_index_config, String fedora_user, String fedora_pass) throws IOException {
-        this.client = new OkHttpClient();
-        
+        this.client = new OkHttpClient.Builder().connectTimeout(60, TimeUnit.SECONDS).writeTimeout(60, TimeUnit.SECONDS).readTimeout(60, TimeUnit.SECONDS).build();
         this.es_index_url = es_index_url.endsWith("/") ? es_index_url : es_index_url + "/";
         this.fedora_cred = Credentials.basic(fedora_user, fedora_pass);
         
