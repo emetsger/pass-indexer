@@ -12,8 +12,8 @@
         },
         "nih_zero_ignore" : {
           "type": "pattern_replace",
-          "pattern": "\\A([A-Za-z]\\w\\d)\\s*([A-Za-z][A-Za-z])(0*)",
-          "replacement": "$2"
+          "pattern": "\\A[A-Za-z]\\w\\d([A-Za-z][A-Za-z])0{0,4}(\\d{2,6})\\Z",
+          "replacement": "$1$2"
         },
         "period_dash_whitespace_ignore" : {
           "type": "pattern_replace",
