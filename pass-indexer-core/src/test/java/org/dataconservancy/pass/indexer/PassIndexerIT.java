@@ -48,7 +48,7 @@ public class PassIndexerIT implements IndexerConstants {
 		serv.setElasticsearchIndexUrl("http://localhost:9200/pass/");
 		serv.setFedoraUser("admin");
 		serv.setFedoraPass("moo");
-		serv.setAllowedTypePrefix("http://example.org/pass/");
+		serv.setAllowedTypePrefix("http://oapass.org/ns/pass#");
 
 		serv.start();
 
@@ -124,7 +124,7 @@ public class PassIndexerIT implements IndexerConstants {
 
 		// Must set @id to ""
 		result.put("@id", "");
-		result.put("@context", "https://oa-pass.github.io/pass-data-model/src/main/resources/context-2.0.jsonld");
+		result.put("@context", "https://oa-pass.github.io/pass-data-model/src/main/resources/context-2.2.jsonld");
 		result.put("@type", type);
 
 		return result;
