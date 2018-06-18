@@ -38,7 +38,10 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         try (FedoraIndexerService serv = new FedoraIndexerService()) {
-            serv.setJmsConnectionFactory(new ActiveMQConnectionFactory(get_config("PI_FEDORA_JMS_BROKER")));
+            serv.setJmsConnectionFactory(new ActiveMQConnectionFactory(
+                    get_config("PI_FEDORA_JMS_USER", null), 
+                    get_config("PI_FEDORA_JMS_PASSWORD", null), 
+                    get_config("PI_FEDORA_JMS_BROKER")));
             serv.setJmsQueue(get_config("PI_FEDORA_JMS_QUEUE"));
             serv.setElasticsearchIndexUrl(get_config("PI_ES_INDEX"));
             serv.setElasticsearchIndexConfig(get_config("PI_ES_CONFIG", null));            

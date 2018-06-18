@@ -76,12 +76,16 @@ Configuration properties:
 * PI_ES_INDEX=http://elasticsearch:9200/pass/
 * PI_ES_CONFIG=/file/or/resource/path/config.json
 * PI_FEDORA_JMS_BROKER=tcp://fcrepo:61616
+* PI_FEDORA_JMS_USER=jmsuser
+* PI_FEDORA_JMS_PASSWORD=jmspassword
 * PI_FEDORA_JMS_QUEUE=fedora
 * PI_TYPE_PREFIX=http://oapass.org/ns/pass#
 * PI_LOG_LEVEL=debug
 
 
 The PI_FEDORA_USER and PI_FEDORA_PASS are the credentials used to connect to Fedora with basic auth.
+
+The PI_FEDORA_JMS_USER and PI_FEDORA_JMS_PASSWORD are credentials used to connect to the activemq broker, if it is secured.
 
 The PI_ES_INDEX is the index where Fedora documents are sent. If PI_ES_CONFIG is set to a file or
 a classpath resource, it will be used as the Elasticsearch index configuration if the index does not
