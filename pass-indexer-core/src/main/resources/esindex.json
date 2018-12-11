@@ -89,6 +89,8 @@
         "submission": {"type": "keyword", "normalizer": "fedora_uri"},
         "submitted": {"type": "boolean"},
         "submittedDate": {"type": "date"},
+        "schemaKey": {"type":  "keyword"},
+        "schemaUri": {"type":  "keyword" },
         "title": {"type": "text"},        
         "uri": {"type": "keyword"},
         "url": {"type": "keyword"},
